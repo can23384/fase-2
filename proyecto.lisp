@@ -12,7 +12,7 @@
 ;;; @param n El número entero del cual se calculará el factorial.
 ;;; @return El factorial de n, si n es un número entero no negativo.
 ;;; @error Si n es una lista, no es un número entero, o es negativo.
-(defun factorial-wrapper (n)
+(defun factorial-comprobar (n)
   "Envuelve la función factorial para realizar validaciones de entrada."
   (cond ((listp n)               ; Comprobación si n es una lista
          (error "El argumento no puede ser una lista"))
@@ -25,4 +25,4 @@
 ;;; Solicita al usuario un número y muestra su factorial.
 (format t "Ingrese el numero: ")
 (setq n (read))
-(format t "El factorial de ~d es: ~d~%" n (factorial-wrapper n))
+(format t "El factorial de ~d es: ~d~%" n (factorial-comprobar n))
