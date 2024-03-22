@@ -24,7 +24,6 @@ public class LispInterpreter {
         globalEnv.put("COND", null);
         globalEnv.put("SETQ", null);
         globalEnv.put("DEFUN", null);
-
         localEnvs.push(globalEnv);
 
         String and = "defun and (h k) (cond ((= h nil) nil) ((= k nil) nil) (t t))";
@@ -39,15 +38,14 @@ public class LispInterpreter {
     }
 
     public List<?> StringToLisp(String expression) throws Exception {
-        boolean inList = false; 
+        List<Object> list = new ArrayList<>();
+        int nlists = 0;
+        String arg = "";
+        boolean inList = false;
         boolean inArg = false;
         boolean inString = false;
-        boolean inComentary = false;
-        String arg = "";
-        int nlists = 0;
-        List<Object> list = new ArrayList<>();
+        boolean inComentary = false;        
         
-
         for (String c : expression.split("")) {
             if (c.isBlank()) {
                 if (inArg && !inList && !inString) {
@@ -87,7 +85,6 @@ public class LispInterpreter {
                     continue;
                 }
                 inArg = true;
-                
 
                 if (c.equals("\"") && !inList) {
                     inString = !inString;
@@ -111,8 +108,6 @@ public class LispInterpreter {
                     arg = arg.concat(c);
                 }
             }
-
-
         }
         if (inList || inString){
             throw new Exception();
@@ -167,7 +162,6 @@ public class LispInterpreter {
         return arg;
     }
 
-
     public Object eval(List<?> list) throws Exception {
         String first = (String) list.get(0); 
         int numberOfParams = list.size() - 1;
@@ -221,23 +215,22 @@ public class LispInterpreter {
                 default:
                 Object item = globalEnv.get(first);
                 if (item == null) {
-                    throw new Exception("Variable no definida: " + first);
+                    throw new Exception(first);
                 }
                 if (item.getClass() == LispFunction.class) {
                     if (numberOfParams == ((LispFunction) item).getParams().size()) {
                         Object result = ((LispFunction) item).apply(list.subList(1, list.size()));
                         return result;
                     } else {
-                        throw new Exception("Número incorrecto de parámetros para la función: " + first);
+                        throw new Exception(first);
                     }
                 } else {
-                    throw new Exception("Nombre no reconocido: " + first);
+                    throw new Exception(first);
                 }
 
         }
 
     }
-
 
     public Object suma(List<?> args) throws Exception {
         Object result = 0; boolean stillInt = true;
@@ -270,8 +263,6 @@ public class LispInterpreter {
         }
         return result;
     }
-    
-
 
     public Object substract(List<?> args) throws Exception {
         if (args.isEmpty()) {
@@ -294,7 +285,6 @@ public class LispInterpreter {
         return result;
     }
     
-
     public Object multiplicar(List<?> args) throws Exception {
         if (args.isEmpty()) {
             throw new Exception("No argumentos");
@@ -309,7 +299,6 @@ public class LispInterpreter {
         return result;
     }
     
-
     public Object division(List<?> args) throws Exception {
         if (args.size() != 2) {
         throw new Exception("");
@@ -325,7 +314,6 @@ public class LispInterpreter {
         return numerator / denominator;
     }
 
-
     public boolean moreThan(List<?> args) throws Exception {
         if (args.size() != 2) {
             throw new Exception();
@@ -338,7 +326,6 @@ public class LispInterpreter {
             throw new Exception();
         }
     }
-
 
     public boolean lessThan(List<?> args) throws Exception {
         if (args.size() != 2) {
@@ -364,7 +351,7 @@ public class LispInterpreter {
 
     private boolean isEqual(List<?> args) {
         if (args.size() < 2) {
-            throw new RuntimeException("EQUAL requires at least two arguments");
+            throw new RuntimeException("Se requieren dos argumentos");
         }
         Object first = evaluateNested(args.get(0));
         for (int i = 1; i < args.size(); i++) {
@@ -381,10 +368,10 @@ public class LispInterpreter {
         } else if (expression instanceof String) {
             String expStr = (String) expression;
             } else {
-                throw new RuntimeException("Unknown function: " );
+                throw new RuntimeException("funcion desconocida " );
             }
         
-        throw new RuntimeException("Invalid expression: " + expression);
+        throw new RuntimeException("expresion desconocida " + expression);
     }
 
     private Object evaluateNested(Object expression) {
@@ -394,7 +381,6 @@ public class LispInterpreter {
             return expression;
         }
     }
-
 
     public boolean atom(List<?> args) throws Exception {
         if (args.size() != 1) {
@@ -446,7 +432,6 @@ public class LispInterpreter {
 
     return null;    }
 
-
     public Object quote(List<?> args) throws Exception {
 
         if (args.size() != 1) {
@@ -455,7 +440,6 @@ public class LispInterpreter {
 
         return args.get(0);
     }
-
 
     public void setq(List<?> args) throws Exception {
         if (args.get(0).getClass() != String.class) {
@@ -485,7 +469,6 @@ public class LispInterpreter {
         return;
     }
 
-
     public void defun(List<?> args) throws Exception {
         String name = (String) args.get(0);
         if (name.contains("\"")) {
@@ -501,13 +484,10 @@ public class LispInterpreter {
         protected String name;
         protected List<?> params;
         protected List<?> body;
-        
-        
-        
+            
         public Object apply(List<?> argList) throws Exception {
             Stack<Map<String, Object>> localEnvs = LispInterpreter.getInterpreter().getLocalEnvs();
             localEnvs.push(new HashMap<>(localEnvs.peek()));
-    
     
                 for (int i = 0; i < params.size(); i++) {
                     Object arg = argList.get(i);
@@ -516,7 +496,6 @@ public class LispInterpreter {
                     } else if (arg.getClass() == String.class && localEnvs.peek().containsKey(arg)) {
                         arg = LispInterpreter.getInterpreter().getLocalEnvs().peek().get(arg);
                     }
-    
     
                     localEnvs.peek().put((String) params.get(i), arg);
                 }
@@ -528,7 +507,6 @@ public class LispInterpreter {
                 LispInterpreter.getInterpreter().updateGlobalEnv();
                 return result;
         }
-    
     
         public LispFunction(String name, List<?> params, List<?> body) {
             this.name = name;
