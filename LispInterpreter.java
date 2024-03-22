@@ -2,6 +2,7 @@ import java.util.*;
 
 public class LispInterpreter {
     private static LispInterpreter interpreter;
+    private Map<String, Object> environment;
     private Stack<Map<String, Object>> localEnvs = new Stack<>();
     private Map<String, Object> globalEnv = new HashMap<>();
     
@@ -359,6 +360,39 @@ public class LispInterpreter {
         Object arg1 = getArg(args.get(0));
         Object arg2 = getArg(args.get(1));
         return arg1.equals(arg2);
+    }
+
+    private boolean isEqual(List<?> args) {
+        if (args.size() < 2) {
+            throw new RuntimeException("EQUAL requires at least two arguments");
+        }
+        Object first = evaluateNested(args.get(0));
+        for (int i = 1; i < args.size(); i++) {
+            if (!first.equals(evaluateNested(args.get(i)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Object eval(Object expression) {
+        if (expression instanceof Integer || expression instanceof Double) {
+            return expression;
+        } else if (expression instanceof String) {
+            String expStr = (String) expression;
+            } else {
+                throw new RuntimeException("Unknown function: " );
+            }
+        
+        throw new RuntimeException("Invalid expression: " + expression);
+    }
+
+    private Object evaluateNested(Object expression) {
+        if (expression instanceof List) {
+            return eval(expression);
+        } else {
+            return expression;
+        }
     }
 
 
